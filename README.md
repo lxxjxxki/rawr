@@ -2,6 +2,12 @@
 
 YouTube playlist manager with per-video volume control and real-time multi-device sync.
 
+## Live Demo
+
+http://youflow.mooo.com
+
+AWS EC2에 배포되어 있습니다. 회원가입 후 바로 이용 가능합니다.
+
 ## Features
 
 - YouTube 플레이리스트 관리 (URL 단건 추가 / YouTube 플레이리스트 일괄 import)
