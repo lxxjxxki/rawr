@@ -29,6 +29,11 @@ export function getArticleBySlug(slug: string) {
   return request<ArticleResponse>(`/api/articles/${slug}`)
 }
 
+export function searchArticles(q: string, page = 0, size = 24) {
+  const params = new URLSearchParams({ q, page: String(page), size: String(size) })
+  return request<PageResponse<ArticleResponse>>(`/api/articles/search?${params}`)
+}
+
 // Comments
 export function getComments(articleId: string) {
   return request<CommentResponse[]>(`/api/articles/${articleId}/comments`)

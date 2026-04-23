@@ -40,6 +40,11 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ArticleResponse> search(String q, Pageable pageable) {
+        return articleRepository.search(q, pageable).map(ArticleResponse::from);
+    }
+
+    @Transactional(readOnly = true)
     public Page<ArticleResponse> listPublished(Category category, Pageable pageable) {
         Page<Article> page = category != null
                 ? articleRepository.findByStatusAndCategory(ArticleStatus.PUBLISHED, category, pageable)
