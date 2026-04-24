@@ -6,10 +6,8 @@ import { useRef } from 'react'
 import { useUIStore } from '@/store/uiStore'
 
 const NAV_ITEMS = [
+  { label: 'SHOP', href: '/shop' },
   { label: 'FASHION', href: '/fashion' },
-  { label: 'ART', href: '/art' },
-  { label: 'MUSIC', href: '/music' },
-  { label: 'ETC', href: '/etc' },
   { label: 'ABOUT', href: '/about' },
 ]
 

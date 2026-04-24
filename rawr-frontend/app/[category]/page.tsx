@@ -1,20 +1,16 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import ArticleGrid from '@/components/ArticleGrid'
 import { getArticles } from '@/lib/api'
 import type { ArticleResponse } from '@/types'
 
-// Categories connected to backend
 const BACKEND_CATEGORIES: Record<string, string> = {
   fashion: 'FASHION',
-  music: 'MUSIC',
-  art: 'ART',
-  etc: 'ETC',
 }
 
 export const dynamic = 'force-dynamic'
 
-// All valid routes
-const VALID_CATEGORIES = ['music', 'fashion', 'art', 'etc']
+const VALID_CATEGORIES = ['fashion']
+const REDIRECT_CATEGORIES = ['music', 'art', 'etc']
 
 interface Props {
   params: { category: string }
@@ -23,6 +19,7 @@ interface Props {
 export default async function CategoryPage({ params }: Props) {
   const slug = params.category.toLowerCase()
 
+  if (REDIRECT_CATEGORIES.includes(slug)) redirect('/fashion')
   if (!VALID_CATEGORIES.includes(slug)) notFound()
 
   let articles: ArticleResponse[] = []
