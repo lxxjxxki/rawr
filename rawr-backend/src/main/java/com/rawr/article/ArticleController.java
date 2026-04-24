@@ -33,6 +33,14 @@ public class ArticleController {
                 PageRequest.of(page, size, Sort.by("publishedAt").descending()));
     }
 
+    @GetMapping("/search")
+    public Page<ArticleResponse> search(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "24") int size) {
+        return articleService.search(q, PageRequest.of(page, size));
+    }
+
     @GetMapping("/{slug}")
     public ArticleResponse get(@PathVariable String slug) {
         return articleService.getBySlug(slug);

@@ -1,18 +1,33 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useRef } from 'react'
 import { useUIStore } from '@/store/uiStore'
 
 const NAV_ITEMS = [
-  { label: 'MUSIC', href: '/music' },
   { label: 'FASHION', href: '/fashion' },
   { label: 'ART', href: '/art' },
+  { label: 'MUSIC', href: '/music' },
   { label: 'ETC', href: '/etc' },
   { label: 'ABOUT', href: '/about' },
 ]
 
 export default function Sidebar() {
   const { sidebarOpen, closeSidebar } = useUIStore()
+  const router = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function handleSearch() {
+    const q = inputRef.current?.value.trim()
+    if (!q) return
+    closeSidebar()
+    router.push(`/search?q=${encodeURIComponent(q)}`)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') handleSearch()
+  }
 
   return (
     <>
@@ -41,11 +56,13 @@ export default function Sidebar() {
         <div className="px-5 mb-6">
           <div className="flex items-center border border-black overflow-hidden">
             <input
+              ref={inputRef}
               type="text"
               placeholder="Search"
               className="flex-1 px-3 py-2 text-sm outline-none bg-transparent"
+              onKeyDown={handleKeyDown}
             />
-            <button className="pr-2 py-2 flex items-center" aria-label="Search">
+            <button className="pr-2 py-2 flex items-center" aria-label="Search" onClick={handleSearch}>
               <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />

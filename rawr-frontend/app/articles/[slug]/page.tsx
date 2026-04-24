@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getArticleBySlug } from '@/lib/api'
+import BookmarkButton from '@/components/BookmarkButton'
 import type { Metadata } from 'next'
 
 export const revalidate = 60
@@ -60,11 +61,14 @@ export default async function ArticlePage({ params }: Props) {
       </h1>
 
       {/* Meta */}
-      <div className="flex items-center gap-4 text-zinc-500 text-sm mb-10 pb-6 border-b border-zinc-800">
-        <span>{article.authorName}</span>
-        {article.publishedAt && (
-          <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-        )}
+      <div className="flex items-center justify-between gap-4 text-zinc-500 text-sm mb-10 pb-6 border-b border-zinc-800">
+        <div className="flex items-center gap-4">
+          <span>{article.authorName}</span>
+          {article.publishedAt && (
+            <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          )}
+        </div>
+        <BookmarkButton articleId={article.id} />
       </div>
 
       {/* Content */}
