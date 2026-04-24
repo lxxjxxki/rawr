@@ -3,6 +3,7 @@ import { Space_Grotesk, Montserrat } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
+import Footer from '@/components/Footer'
 import AuthInitializer from '@/components/AuthInitializer'
 
 const spaceGrotesk = Space_Grotesk({
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <Sidebar />
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   )
