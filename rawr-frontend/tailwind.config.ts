@@ -13,7 +13,7 @@ const config: Config = {
         sidebar: '#ffffff',
       },
       fontFamily: {
-        logo: ['"Times New Roman MT Condensed"', '"Times New Roman"', 'serif'],
+        logo: ['var(--font-playfair-display)', 'serif'],
         sans: ['var(--font-space-grotesk)', 'sans-serif'],
         montserrat: ['var(--font-montserrat)', 'sans-serif'],
       },
