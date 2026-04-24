@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Montserrat } from 'next/font/google'
+import { Space_Grotesk, Montserrat, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
@@ -18,6 +18,13 @@ const montserrat = Montserrat({
   variable: '--font-montserrat',
 })
 
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  style: ['italic', 'normal'],
+  variable: '--font-playfair-display',
+})
+
 export const metadata: Metadata = {
   title: 'rawr',
   description:
@@ -31,7 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${montserrat.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${montserrat.variable} ${playfair.variable}`}>
       <body className="bg-black text-white font-sans min-h-screen">
         <AuthInitializer />
         <Header />
