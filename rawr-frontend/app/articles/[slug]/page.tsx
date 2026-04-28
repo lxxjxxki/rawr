@@ -69,7 +69,10 @@ export default async function ArticlePage({ params }: Props) {
             <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
           )}
         </div>
-        <BookmarkButton articleId={article.id} />
+        <div className="flex items-center gap-5">
+          <LikeButton articleId={article.id} />
+          <BookmarkButton articleId={article.id} />
+        </div>
       </div>
 
       {/* Content */}
@@ -77,10 +80,6 @@ export default async function ArticlePage({ params }: Props) {
         className="prose prose-invert prose-lg max-w-none"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
-
-      <div className="mt-12 flex justify-center">
-        <LikeButton articleId={article.id} />
-      </div>
     </article>
   )
 }
