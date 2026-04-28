@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getArticleBySlug } from '@/lib/api'
 import BookmarkButton from '@/components/BookmarkButton'
+import LikeButton from '@/components/LikeButton'
 import type { Metadata } from 'next'
 
 export const revalidate = 60
@@ -76,6 +77,10 @@ export default async function ArticlePage({ params }: Props) {
         className="prose prose-invert prose-lg max-w-none"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
+
+      <div className="mt-12 flex justify-center">
+        <LikeButton articleId={article.id} />
+      </div>
     </article>
   )
 }
