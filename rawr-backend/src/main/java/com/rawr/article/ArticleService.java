@@ -31,11 +31,20 @@ public class ArticleService {
     }
 
     public ArticleResponse create(UUID authorId, ArticleRequest request) {
+        if (request.instagramTimestamp() != null) {
+            var existing = articleRepository.findByInstagramTimestamp(request.instagramTimestamp());
+            if (existing.isPresent()) {
+                return ArticleResponse.from(existing.get());
+            }
+        }
         var author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         String slug = uniqueSlug(toSlug(request.title()));
         Article article = new Article(request.title(), slug, request.content(),
                 request.coverImage(), request.category(), author);
+        if (request.instagramTimestamp() != null) {
+            article.setInstagramTimestamp(request.instagramTimestamp());
+        }
         return ArticleResponse.from(articleRepository.save(article));
     }
 

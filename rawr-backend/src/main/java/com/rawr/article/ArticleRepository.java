@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface ArticleRepository extends JpaRepository<Article, UUID> {
     Optional<Article> findBySlug(String slug);
     boolean existsBySlug(String slug);
+    Optional<Article> findByInstagramTimestamp(String instagramTimestamp);
     Page<Article> findByStatus(ArticleStatus status, Pageable pageable);
     Page<Article> findByStatusAndCategory(ArticleStatus status, Category category, Pageable pageable);
     List<Article> findByStatus(ArticleStatus status);

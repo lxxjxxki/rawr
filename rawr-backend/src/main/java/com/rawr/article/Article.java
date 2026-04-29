@@ -36,6 +36,9 @@ public class Article {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Column(name = "instagram_timestamp")
+    private String instagramTimestamp;
+
     private LocalDateTime publishedAt;
 
     @Column(nullable = false)
@@ -54,6 +57,10 @@ public class Article {
         this.coverImage = coverImage;
         this.category = category;
         this.author = author;
+    }
+
+    public void setInstagramTimestamp(String instagramTimestamp) {
+        this.instagramTimestamp = instagramTimestamp;
     }
 
     public void update(String title, String slug, String content,
@@ -89,4 +96,5 @@ public class Article {
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getInstagramTimestamp() { return instagramTimestamp; }
 }

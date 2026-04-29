@@ -66,7 +66,7 @@ class BookmarkServiceTest {
     @Test
     @DisplayName("내 북마크 목록을 조회하면 북마크한 기사 목록이 반환된다")
     void myBookmarks_returnsBookmarkedArticles() {
-        Article article2 = new Article("Title2", "title-2", "Content2", null, Category.CULTURE, user);
+        Article article2 = new Article("Title2", "title-2", "Content2", null, Category.FASHION, user);
         Bookmark b1 = new Bookmark(article, user);
         Bookmark b2 = new Bookmark(article2, user);
         when(bookmarkRepository.findByUserIdOrderByIdDesc(any())).thenReturn(List.of(b2, b1));
