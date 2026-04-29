@@ -11,14 +11,27 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ArticleRepository extends JpaRepository<Article, UUID> {
-    Optional<Article> findBySlug(String slug);
+    Optional<Article> findBySlugAndDeletedAtIsNull(String slug);
     boolean existsBySlug(String slug);
     Optional<Article> findByInstagramTimestamp(String instagramTimestamp);
-    Page<Article> findByStatus(ArticleStatus status, Pageable pageable);
-    Page<Article> findByStatusAndCategory(ArticleStatus status, Category category, Pageable pageable);
-    List<Article> findByStatus(ArticleStatus status);
 
-    @Query("SELECT a FROM Article a WHERE a.status = 'PUBLISHED' AND " +
+    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.deletedAt IS NULL")
+    Page<Article> findActiveByStatus(@Param("status") ArticleStatus status, Pageable pageable);
+
+    @Query("SELECT a FROM Article a WHERE a.status = :status AND a.category = :category AND a.deletedAt IS NULL")
+    Page<Article> findActiveByStatusAndCategory(@Param("status") ArticleStatus status,
+                                                @Param("category") Category category,
+                                                Pageable pageable);
+
+    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND a.deletedAt IS NOT NULL " +
+           "ORDER BY a.deletedAt DESC")
+    List<Article> findDeletedByAuthor(@Param("authorId") UUID authorId);
+
+    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND a.deletedAt IS NULL " +
+           "ORDER BY a.updatedAt DESC")
+    List<Article> findActiveByAuthor(@Param("authorId") UUID authorId);
+
+    @Query("SELECT a FROM Article a WHERE a.status = 'PUBLISHED' AND a.deletedAt IS NULL AND " +
            "(LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(a.content) LIKE LOWER(CONCAT('%', :q, '%'))) " +
            "ORDER BY a.publishedAt DESC")
     Page<Article> search(@Param("q") String q, Pageable pageable);
