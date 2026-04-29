@@ -2,6 +2,7 @@ package com.rawr.article;
 
 import com.rawr.article.dto.ArticleRequest;
 import com.rawr.article.dto.ArticleResponse;
+import com.rawr.article.dto.ArticleRevisionResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -82,5 +84,42 @@ public class ArticleController {
             @AuthenticationPrincipal UUID userId) {
         articleService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
+    public List<ArticleResponse> listMine(@AuthenticationPrincipal UUID userId) {
+        return articleService.listMine(userId);
+    }
+
+    @GetMapping("/me/deleted")
+    @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
+    public List<ArticleResponse> listMyDeleted(@AuthenticationPrincipal UUID userId) {
+        return articleService.listMyDeleted(userId);
+    }
+
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
+    public ArticleResponse restore(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UUID userId) {
+        return articleService.restore(id, userId);
+    }
+
+    @GetMapping("/{id}/revisions")
+    @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
+    public List<ArticleRevisionResponse> listRevisions(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UUID userId) {
+        return articleService.listRevisions(id, userId);
+    }
+
+    @PostMapping("/{id}/revert/{revisionId}")
+    @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
+    public ArticleResponse revert(
+            @PathVariable UUID id,
+            @PathVariable UUID revisionId,
+            @AuthenticationPrincipal UUID userId) {
+        return articleService.revertToRevision(id, revisionId, userId);
     }
 }

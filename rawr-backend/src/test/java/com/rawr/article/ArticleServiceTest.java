@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 class ArticleServiceTest {
 
     @Mock ArticleRepository articleRepository;
+    @Mock ArticleRevisionRepository revisionRepository;
     @Mock UserRepository userRepository;
     @Mock SubscriptionService subscriptionService;
     @InjectMocks ArticleService articleService;
@@ -143,7 +144,7 @@ class ArticleServiceTest {
     @Test
     @DisplayName("존재하지 않는 기사 조회 시 404 예외가 발생한다")
     void getBySlug_nonExistent_throwsNotFound() {
-        when(articleRepository.findBySlug("non-existent")).thenReturn(Optional.empty());
+        when(articleRepository.findBySlugAndDeletedAtIsNull("non-existent")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> articleService.getBySlug("non-existent"))
                 .hasMessageContaining("Article not found");
@@ -183,15 +184,46 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("본인 기사를 삭제할 수 있다")
-    void deleteArticle_byOwner_succeeds() {
+    @DisplayName("본인 기사를 삭제하면 deletedAt이 설정된다 (soft delete)")
+    void deleteArticle_byOwner_marksDeleted() {
         Article article = new Article("Title", "title", "Content", null, Category.FASHION, author);
         ReflectionTestUtils.setField(article, "id", UUID.randomUUID());
         when(articleRepository.findById(any())).thenReturn(Optional.of(article));
-        doNothing().when(articleRepository).delete(any());
+        when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        assertThatCode(() -> articleService.delete(article.getId(), author.getId()))
-                .doesNotThrowAnyException();
-        verify(articleRepository).delete(article);
+        articleService.delete(article.getId(), author.getId());
+
+        assertThat(article.isDeleted()).isTrue();
+        verify(articleRepository).save(article);
+        verify(articleRepository, never()).delete(any(Article.class));
+    }
+
+    @Test
+    @DisplayName("삭제된 기사를 본인이 복구할 수 있다")
+    void restoreArticle_byOwner_clearsDeletedAt() {
+        Article article = new Article("Title", "title", "Content", null, Category.FASHION, author);
+        ReflectionTestUtils.setField(article, "id", UUID.randomUUID());
+        article.markDeleted();
+        when(articleRepository.findById(any())).thenReturn(Optional.of(article));
+        when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        articleService.restore(article.getId(), author.getId());
+
+        assertThat(article.isDeleted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("update 시 변경 전 상태가 revision으로 저장된다")
+    void updateArticle_savesRevision() {
+        Article article = new Article("Old", "old", "Old content", null, Category.FASHION, author);
+        ReflectionTestUtils.setField(article, "id", UUID.randomUUID());
+        when(articleRepository.findById(any())).thenReturn(Optional.of(article));
+        when(articleRepository.existsBySlug(anyString())).thenReturn(false);
+        when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        articleService.update(article.getId(), author.getId(),
+                new ArticleRequest("New", "New content", null, Category.FASHION, null));
+
+        verify(revisionRepository).save(any(ArticleRevision.class));
     }
 }

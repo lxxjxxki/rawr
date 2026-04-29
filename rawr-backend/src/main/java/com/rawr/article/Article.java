@@ -47,6 +47,9 @@ public class Article {
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     protected Article() {}
 
     public Article(String title, String slug, String content,
@@ -85,6 +88,19 @@ public class Article {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void markDeleted() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
     public UUID getId() { return id; }
     public String getTitle() { return title; }
     public String getSlug() { return slug; }
@@ -96,5 +112,6 @@ public class Article {
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
     public String getInstagramTimestamp() { return instagramTimestamp; }
 }
