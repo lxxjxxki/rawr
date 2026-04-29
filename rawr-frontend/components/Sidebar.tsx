@@ -11,8 +11,12 @@ const NAV_ITEMS = [
   { label: 'ABOUT', href: '/about' },
 ]
 
+const EDITOR_NAV_ITEMS = [
+  { label: 'ARTICLES', href: '/admin/articles' },
+]
+
 const OWNER_NAV_ITEMS = [
-  { label: 'ADMIN', href: '/admin/users' },
+  { label: 'USERS', href: '/admin/users' },
 ]
 
 export default function Sidebar() {
@@ -85,6 +89,17 @@ export default function Sidebar() {
               {item.label}
             </Link>
           ))}
+          {(user?.role === 'OWNER' || user?.role === 'CONTRIBUTOR') &&
+            EDITOR_NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={closeSidebar}
+                className="block text-3xl font-bold tracking-tight py-2 hover:text-accent transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
           {user?.role === 'OWNER' &&
             OWNER_NAV_ITEMS.map((item) => (
               <Link

@@ -50,3 +50,22 @@ export interface AdminUser {
   role: 'OWNER' | 'CONTRIBUTOR' | 'READER'
   createdAt: string
 }
+
+export interface ArticleRevisionResponse {
+  id: string
+  articleId: string
+  title: string
+  slug: string
+  content: string
+  coverImage: string | null
+  category: string
+  savedBy: string
+  savedAt: string
+}
+
+export interface ArticleRequest {
+  title: string
+  content: string
+  coverImage: string | null
+  category: 'FASHION' | 'SHOP'
+}
