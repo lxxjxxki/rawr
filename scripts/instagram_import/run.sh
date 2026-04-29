@@ -19,17 +19,23 @@ slack() {
 echo "=== $(date -u '+%Y-%m-%d %H:%M:%S UTC') run start ==="
 
 # 1) instaloader: fetch new posts only
+# We log in with our own IG account (IG_LOGIN_USER) and scrape the public
+# @rawr.co.kr profile. The operator's account is NOT involved.
+IG_LOGIN_USER=_jinkilee
+SESSION_FILE=/home/ec2-user/rawr/ig-import/session-${IG_LOGIN_USER}
+
 source venv/bin/activate
 instaloader \
   --fast-update \
   --no-videos \
-  --sessionfile=/home/ec2-user/rawr/ig-import/session-rawr.co.kr \
+  --login="$IG_LOGIN_USER" \
+  --sessionfile="$SESSION_FILE" \
   --dirname-pattern=/home/ec2-user/rawr/ig-import/{target} \
   rawr.co.kr
 INSTALOADER_RC=$?
 
 if [ $INSTALOADER_RC -ne 0 ]; then
-  MSG=":x: rawr IG import — instaloader failed (rc=$INSTALOADER_RC). Session may be expired; ask operator for new session-rawr.co.kr."
+  MSG=":x: rawr IG import — instaloader failed (rc=$INSTALOADER_RC). Session for ${IG_LOGIN_USER} may be expired; re-run \`instaloader -l ${IG_LOGIN_USER}\` locally and scp the new session file to EC2."
   echo "$MSG"
   slack "$MSG"
   exit 1
