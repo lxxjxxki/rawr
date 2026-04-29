@@ -41,3 +41,12 @@ export interface User {
   profileImage: string | null
   role: 'OWNER' | 'CONTRIBUTOR' | 'READER'
 }
+
+export interface AdminUser {
+  id: string
+  email: string
+  username: string
+  profileImage: string | null
+  role: 'OWNER' | 'CONTRIBUTOR' | 'READER'
+  createdAt: string
+}

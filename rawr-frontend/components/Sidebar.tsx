@@ -11,8 +11,12 @@ const NAV_ITEMS = [
   { label: 'ABOUT', href: '/about' },
 ]
 
+const OWNER_NAV_ITEMS = [
+  { label: 'ADMIN', href: '/admin/users' },
+]
+
 export default function Sidebar() {
-  const { sidebarOpen, closeSidebar } = useUIStore()
+  const { sidebarOpen, closeSidebar, user } = useUIStore()
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -81,6 +85,17 @@ export default function Sidebar() {
               {item.label}
             </Link>
           ))}
+          {user?.role === 'OWNER' &&
+            OWNER_NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={closeSidebar}
+                className="block text-3xl font-bold tracking-tight py-2 hover:text-accent transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
         </nav>
 
         {/* Instagram */}

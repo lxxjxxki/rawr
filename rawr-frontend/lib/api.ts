@@ -1,5 +1,5 @@
 import { getToken } from './auth'
-import type { ArticleResponse, CommentResponse, PageResponse, LikeStatus, User } from '@/types'
+import type { ArticleResponse, CommentResponse, PageResponse, LikeStatus, User, AdminUser } from '@/types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8081'
 
@@ -79,4 +79,16 @@ export function subscribe(email: string) {
 // Auth
 export function getMe() {
   return request<User>('/api/auth/me')
+}
+
+// Admin
+export function getAdminUsers() {
+  return request<AdminUser[]>('/api/admin/users')
+}
+
+export function changeUserRole(userId: string, role: 'READER' | 'CONTRIBUTOR') {
+  return request<AdminUser>(`/api/admin/users/${userId}/role`, {
+    method: 'PATCH',
+    body: JSON.stringify({ role }),
+  })
 }
