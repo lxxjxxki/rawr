@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getArticleBySlug } from '@/lib/api'
+import { highlightHashtags } from '@/lib/highlightHashtags'
+import { linkifyMentions } from '@/lib/linkifyMentions'
 import BookmarkButton from '@/components/BookmarkButton'
 import LikeButton from '@/components/LikeButton'
 import type { Metadata } from 'next'
@@ -78,7 +80,7 @@ export default async function ArticlePage({ params }: Props) {
       {/* Content */}
       <div
         className="prose prose-invert prose-lg max-w-none"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+        dangerouslySetInnerHTML={{ __html: linkifyMentions(highlightHashtags(article.content)) }}
       />
     </article>
   )
