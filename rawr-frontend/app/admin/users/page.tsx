@@ -40,12 +40,19 @@ export default function AdminUsersPage() {
 
   async function handleRoleChange(target: AdminUser, newRole: 'READER' | 'CONTRIBUTOR') {
     if (target.role === newRole) return
+    const previousRole = target.role
+    // Optimistic update — flip the toggle immediately
+    setUsers((users) => users.map((u) => (u.id === target.id ? { ...u, role: newRole } : u)))
     setPendingId(target.id)
     try {
       const updated = await changeUserRole(target.id, newRole)
-      setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
+      setUsers((users) => users.map((u) => (u.id === updated.id ? updated : u)))
     } catch {
-      // ignore
+      // Revert on failure
+      setUsers((users) =>
+        users.map((u) => (u.id === target.id ? { ...u, role: previousRole } : u)),
+      )
+      alert('Role 변경 실패. 잠시 후 다시 시도하세요.')
     } finally {
       setPendingId(null)
     }
@@ -90,7 +97,7 @@ export default function AdminUsersPage() {
                 {u.role === 'OWNER' ? (
                   <span className="text-accent uppercase tracking-widest text-xs font-bold">Owner</span>
                 ) : (
-                  <div className="flex border border-zinc-800">
+                  <div className={`flex border border-zinc-800 ${pendingId === u.id ? 'opacity-60' : ''}`}>
                     {(['READER', 'CONTRIBUTOR'] as const).map((r) => (
                       <button
                         key={r}
@@ -99,10 +106,13 @@ export default function AdminUsersPage() {
                         className={`px-3 py-1.5 text-xs uppercase tracking-widest transition-colors ${
                           u.role === r
                             ? 'bg-accent text-black'
-                            : 'text-zinc-400 hover:text-white disabled:opacity-40'
+                            : 'text-zinc-400 hover:text-white'
                         }`}
                       >
                         {r}
+                        {pendingId === u.id && u.role === r && (
+                          <span className="ml-1 inline-block animate-pulse">·</span>
+                        )}
                       </button>
                     ))}
                   </div>
