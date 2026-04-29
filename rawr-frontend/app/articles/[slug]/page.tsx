@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import { getArticleBySlug } from '@/lib/api'
 import { highlightHashtags } from '@/lib/highlightHashtags'
 import { linkifyMentions } from '@/lib/linkifyMentions'
@@ -40,17 +39,13 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <article className="pt-20 pb-24 max-w-3xl mx-auto px-6">
-      {/* Cover image */}
+      {/* Cover image — natural aspect ratio so IG portrait/square posts aren't cropped */}
       {article.coverImage && (
-        <div className="relative w-full aspect-video mb-10">
-          <Image
-            src={article.coverImage}
-            alt={article.title}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+        <img
+          src={article.coverImage}
+          alt={article.title}
+          className="w-full h-auto mb-10"
+        />
       )}
 
       {/* Category */}
