@@ -64,4 +64,6 @@ public class User {
     }
 
     public void promoteToContributor() { this.role = Role.CONTRIBUTOR; }
+
+    public void setRole(Role role) { this.role = role; }
 }
