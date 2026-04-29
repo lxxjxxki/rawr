@@ -18,6 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +44,7 @@ class ArticleServiceTest {
         when(articleRepository.existsBySlug(anyString())).thenReturn(false);
         when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        var request = new ArticleRequest("My Title", "Content here", "cover.jpg", Category.FASHION);
+        var request = new ArticleRequest("My Title", "Content here", "cover.jpg", Category.FASHION, null);
         var response = articleService.create(UUID.randomUUID(), request);
 
         assertThat(response.status()).isEqualTo(ArticleStatus.DRAFT);
@@ -91,7 +92,7 @@ class ArticleServiceTest {
         when(articleRepository.existsBySlug("my-title-2")).thenReturn(false);
         when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        var request = new ArticleRequest("My Title", "Content", null, Category.CULTURE);
+        var request = new ArticleRequest("My Title", "Content", null, Category.FASHION, null);
         var response = articleService.create(UUID.randomUUID(), request);
 
         assertThat(response.slug()).isEqualTo("my-title-2");
@@ -106,7 +107,7 @@ class ArticleServiceTest {
         when(articleRepository.existsBySlug("my-title-3")).thenReturn(false);
         when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        var response = articleService.create(UUID.randomUUID(), new ArticleRequest("My Title", "C", null, Category.FASHION));
+        var response = articleService.create(UUID.randomUUID(), new ArticleRequest("My Title", "C", null, Category.FASHION, null));
 
         assertThat(response.slug()).isEqualTo("my-title-3");
     }
@@ -119,7 +120,7 @@ class ArticleServiceTest {
         when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         var response = articleService.create(UUID.randomUUID(),
-                new ArticleRequest("패션 트렌드 2026", "Content", null, Category.FASHION));
+                new ArticleRequest("패션 트렌드 2026", "Content", null, Category.FASHION, null));
 
         // Korean characters stripped, only remaining ASCII kept
         assertThat(response.slug()).doesNotContain("패").doesNotContain("션");
@@ -135,7 +136,7 @@ class ArticleServiceTest {
 
         assertThatThrownBy(() ->
             articleService.update(article.getId(), otherUserId,
-                new ArticleRequest("New Title", "New Content", null, Category.CULTURE))
+                new ArticleRequest("New Title", "New Content", null, Category.FASHION, null))
         ).hasMessageContaining("Not your article");
     }
 
@@ -146,6 +147,39 @@ class ArticleServiceTest {
 
         assertThatThrownBy(() -> articleService.getBySlug("non-existent"))
                 .hasMessageContaining("Article not found");
+    }
+
+    @Test
+    @DisplayName("Instagram timestamp이 이미 존재하면 기존 기사를 반환한다 (idempotent)")
+    void createArticle_duplicateInstagramTimestamp_returnsExisting() {
+        Article existing = new Article("Existing", "existing", "Content", null, Category.FASHION, author);
+        ReflectionTestUtils.setField(existing, "id", UUID.randomUUID());
+        existing.setInstagramTimestamp("2025-11-03_10-34-01_UTC");
+        when(articleRepository.findByInstagramTimestamp("2025-11-03_10-34-01_UTC"))
+                .thenReturn(Optional.of(existing));
+
+        var request = new ArticleRequest("New Title", "New Content", null, Category.FASHION, "2025-11-03_10-34-01_UTC");
+        var response = articleService.create(UUID.randomUUID(), request);
+
+        assertThat(response.id()).isEqualTo(existing.getId());
+        assertThat(response.title()).isEqualTo("Existing");
+        verify(articleRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Instagram timestamp이 새로운 경우 정상 저장된다")
+    void createArticle_newInstagramTimestamp_persistsField() {
+        when(articleRepository.findByInstagramTimestamp(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findById(any())).thenReturn(Optional.of(author));
+        when(articleRepository.existsBySlug(anyString())).thenReturn(false);
+        when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        var request = new ArticleRequest("Title", "Content", null, Category.FASHION, "2025-12-01_09-00-00_UTC");
+        articleService.create(UUID.randomUUID(), request);
+
+        verify(articleRepository).save(argThat(a ->
+                "2025-12-01_09-00-00_UTC".equals(a.getInstagramTimestamp())
+        ));
     }
 
     @Test

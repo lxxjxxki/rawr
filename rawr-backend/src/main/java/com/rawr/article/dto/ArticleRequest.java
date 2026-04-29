@@ -8,5 +8,6 @@ public record ArticleRequest(
         @NotBlank String title,
         @NotBlank String content,
         String coverImage,
-        @NotNull Category category
+        @NotNull Category category,
+        String instagramTimestamp
 ) {}
