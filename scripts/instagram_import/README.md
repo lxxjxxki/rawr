@@ -15,19 +15,25 @@ See spec: `docs/superpowers/specs/2026-04-29-instagram-auto-import-design.md`
 
 ## One-time Setup
 
-### 1. Get IG session from operator (one time, ~every 60–90 days)
+### 1. Create an IG session (one time, ~every 60–90 days)
 
-On the **operator's** machine:
+`@rawr.co.kr` is a public profile, so we don't need the operator's account.
+We use any logged-in IG account to fetch it via instaloader.
+
+On your local machine, with whichever IG account you want to use as the
+"reader" (the username is wired into `run.sh` as `IG_LOGIN_USER`; default
+`_jinkilee`):
+
 ```bash
 pip install instaloader
-instaloader -l rawr.co.kr
+instaloader -l <your-ig-username>
 # enter password / 2FA when prompted
 # locate the session file:
-#   macOS:  ~/Library/Application Support/Instaloader/session-rawr.co.kr
-#   Linux:  ~/.config/instaloader/session-rawr.co.kr
+#   macOS:  ~/Library/Application Support/Instaloader/session-<your-ig-username>
+#   Linux:  ~/.config/instaloader/session-<your-ig-username>
 ```
 
-Send the session file securely to the project owner.
+If you change the IG account, update `IG_LOGIN_USER` in `run.sh` to match.
 
 ### 2. Issue a service JWT (1 year)
 
@@ -64,19 +70,20 @@ pip install -r requirements.txt
 deactivate
 ```
 
-scp the four secret files from your machine:
+scp the secret files from your machine. Replace `<USER>` with your IG
+username (the same one used in step 1 and in `IG_LOGIN_USER`):
 ```bash
-scp -i rawr-key.pem session-rawr.co.kr   ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
-scp -i rawr-key.pem service-token.txt    ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
-scp -i rawr-key.pem slack-webhook.txt    ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
+scp -i rawr-key.pem ~/.config/instaloader/session-<USER>  ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
+scp -i rawr-key.pem service-token.txt                     ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
+scp -i rawr-key.pem slack-webhook.txt                     ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
 scp -i rawr-key.pem run.sh import_instagram.py requirements.txt \
     ec2-user@13.209.65.184:/home/ec2-user/rawr/ig-import/
 
 # tighten permissions
 ssh -i rawr-key.pem ec2-user@13.209.65.184 \
-  'cd /home/ec2-user/rawr/ig-import && \
-   chmod 0600 session-rawr.co.kr service-token.txt slack-webhook.txt && \
-   chmod 0700 run.sh'
+  "cd /home/ec2-user/rawr/ig-import && \
+   chmod 0600 session-<USER> service-token.txt slack-webhook.txt && \
+   chmod 0700 run.sh"
 ```
 
 ### 5. Crontab
@@ -103,9 +110,9 @@ Expected: instaloader downloads (or no-op), python script reports `created: N, d
 
 ## Renewal
 
-When Slack alerts ":x: rawr IG import — instaloader failed (Session may be expired)":
-1. Get a fresh `session-rawr.co.kr` from the operator.
-2. `scp` it to EC2 (overwrite).
+When Slack alerts ":x: rawr IG import — instaloader failed (Session for <USER> may be expired)":
+1. Re-run `instaloader -l <USER>` on your local machine, enter password / 2FA.
+2. `scp` the refreshed session file to EC2 (overwrite).
 3. Manually re-run `run.sh` to confirm.
 
 ## Operations Notes
