@@ -1,5 +1,14 @@
 import { getToken } from './auth'
-import type { ArticleResponse, CommentResponse, PageResponse, LikeStatus, User, AdminUser } from '@/types'
+import type {
+  ArticleResponse,
+  CommentResponse,
+  PageResponse,
+  LikeStatus,
+  User,
+  AdminUser,
+  ArticleRevisionResponse,
+  ArticleRequest,
+} from '@/types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8081'
 
@@ -79,6 +88,49 @@ export function subscribe(email: string) {
 // Auth
 export function getMe() {
   return request<User>('/api/auth/me')
+}
+
+// Article admin
+export function createArticle(payload: ArticleRequest) {
+  return request<ArticleResponse>('/api/articles', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateArticle(id: string, payload: ArticleRequest) {
+  return request<ArticleResponse>(`/api/articles/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteArticle(id: string) {
+  return request<void>(`/api/articles/${id}`, { method: 'DELETE' })
+}
+
+export function getMyArticles() {
+  return request<ArticleResponse[]>('/api/articles/me')
+}
+
+export function getMyDeletedArticles() {
+  return request<ArticleResponse[]>('/api/articles/me/deleted')
+}
+
+export function restoreArticle(id: string) {
+  return request<ArticleResponse>(`/api/articles/${id}/restore`, { method: 'POST' })
+}
+
+export function getArticleRevisions(id: string) {
+  return request<ArticleRevisionResponse[]>(`/api/articles/${id}/revisions`)
+}
+
+export function revertArticle(id: string, revisionId: string) {
+  return request<ArticleResponse>(`/api/articles/${id}/revert/${revisionId}`, { method: 'POST' })
+}
+
+export function getArticleById(id: string) {
+  return request<ArticleResponse>(`/api/articles/${id}`)
 }
 
 // Admin
