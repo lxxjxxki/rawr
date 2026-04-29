@@ -16,6 +16,8 @@ Configuration is via environment variables (see run.sh):
 - IG_SLACK_WEBHOOK_FILE   (optional) path to file with Slack webhook URL
 """
 
+from __future__ import annotations
+
 import json
 import os
 import sys
