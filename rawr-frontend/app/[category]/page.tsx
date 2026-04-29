@@ -26,7 +26,7 @@ export default async function CategoryPage({ params }: Props) {
 
   if (BACKEND_CATEGORIES[slug]) {
     try {
-      const data = await getArticles(BACKEND_CATEGORIES[slug], 0, 24)
+      const data = await getArticles(BACKEND_CATEGORIES[slug], 0, 1000)
       articles = data.content
     } catch {
       articles = []
