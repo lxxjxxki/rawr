@@ -74,21 +74,21 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public List<ArticleResponse> listMine(UUID userId) {
-        return articleRepository.findActiveByAuthor(userId).stream()
+    public List<ArticleResponse> listAllForEditors() {
+        return articleRepository.findAllActive().stream()
                 .map(ArticleResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ArticleResponse> listMyDeleted(UUID userId) {
-        return articleRepository.findDeletedByAuthor(userId).stream()
+    public List<ArticleResponse> listAllDeletedForEditors() {
+        return articleRepository.findAllDeleted().stream()
                 .map(ArticleResponse::from)
                 .toList();
     }
 
     public ArticleResponse update(UUID articleId, UUID userId, ArticleRequest request) {
-        Article article = findArticleOwnedBy(articleId, userId);
+        Article article = findActiveArticle(articleId);
         revisionRepository.save(new ArticleRevision(article, userId));
         String slug = article.getTitle().equals(request.title())
                 ? article.getSlug()
@@ -116,7 +116,7 @@ public class ArticleService {
     }
 
     public void delete(UUID articleId, UUID userId) {
-        Article article = findArticleOwnedBy(articleId, userId);
+        Article article = findActiveArticle(articleId);
         article.markDeleted();
         articleRepository.save(article);
     }
@@ -124,9 +124,6 @@ public class ArticleService {
     public ArticleResponse restore(UUID articleId, UUID userId) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
-        if (!article.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your article");
-        }
         if (!article.isDeleted()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Article is not deleted");
         }
@@ -136,14 +133,14 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public List<ArticleRevisionResponse> listRevisions(UUID articleId, UUID userId) {
-        Article article = findArticleOwnedBy(articleId, userId);
+        Article article = findActiveArticle(articleId);
         return revisionRepository.findByArticleIdOrderBySavedAtDesc(article.getId()).stream()
                 .map(ArticleRevisionResponse::from)
                 .toList();
     }
 
     public ArticleResponse revertToRevision(UUID articleId, UUID revisionId, UUID userId) {
-        Article article = findArticleOwnedBy(articleId, userId);
+        Article article = findActiveArticle(articleId);
         ArticleRevision revision = revisionRepository.findById(revisionId)
                 .filter(r -> r.getArticleId().equals(article.getId()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Revision not found"));
@@ -154,13 +151,10 @@ public class ArticleService {
         return ArticleResponse.from(articleRepository.save(article));
     }
 
-    private Article findArticleOwnedBy(UUID articleId, UUID userId) {
-        Article article = articleRepository.findById(articleId)
+    private Article findActiveArticle(UUID articleId) {
+        return articleRepository.findById(articleId)
+                .filter(a -> !a.isDeleted())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
-        if (!article.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your article");
-        }
-        return article;
     }
 
     private String toSlug(String title) {

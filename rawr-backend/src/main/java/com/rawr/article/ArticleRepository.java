@@ -23,13 +23,11 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
                                                 @Param("category") Category category,
                                                 Pageable pageable);
 
-    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND a.deletedAt IS NOT NULL " +
-           "ORDER BY a.deletedAt DESC")
-    List<Article> findDeletedByAuthor(@Param("authorId") UUID authorId);
+    @Query("SELECT a FROM Article a WHERE a.deletedAt IS NOT NULL ORDER BY a.deletedAt DESC")
+    List<Article> findAllDeleted();
 
-    @Query("SELECT a FROM Article a WHERE a.author.id = :authorId AND a.deletedAt IS NULL " +
-           "ORDER BY a.updatedAt DESC")
-    List<Article> findActiveByAuthor(@Param("authorId") UUID authorId);
+    @Query("SELECT a FROM Article a WHERE a.deletedAt IS NULL ORDER BY a.updatedAt DESC")
+    List<Article> findAllActive();
 
     @Query("SELECT a FROM Article a WHERE a.status = 'PUBLISHED' AND a.deletedAt IS NULL AND " +
            "(LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(a.content) LIKE LOWER(CONCAT('%', :q, '%'))) " +
