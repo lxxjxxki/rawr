@@ -128,17 +128,19 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("본인 기사만 수정할 수 있다")
-    void updateArticle_byNonOwner_throwsForbidden() {
-        UUID otherUserId = UUID.randomUUID();
+    @DisplayName("editor는 다른 사람의 기사도 수정할 수 있다")
+    void updateArticle_byOtherEditor_succeeds() {
+        UUID otherEditorId = UUID.randomUUID();
         Article article = new Article("Title", "title", "Content", null, Category.FASHION, author);
         ReflectionTestUtils.setField(article, "id", UUID.randomUUID());
         when(articleRepository.findById(any())).thenReturn(Optional.of(article));
+        when(articleRepository.existsBySlug(anyString())).thenReturn(false);
+        when(articleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        assertThatThrownBy(() ->
-            articleService.update(article.getId(), otherUserId,
-                new ArticleRequest("New Title", "New Content", null, Category.FASHION, null))
-        ).hasMessageContaining("Not your article");
+        articleService.update(article.getId(), otherEditorId,
+                new ArticleRequest("New Title", "New Content", null, Category.FASHION, null));
+
+        assertThat(article.getTitle()).isEqualTo("New Title");
     }
 
     @Test

@@ -88,14 +88,14 @@ public class ArticleController {
 
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
-    public List<ArticleResponse> listMine(@AuthenticationPrincipal UUID userId) {
-        return articleService.listMine(userId);
+    public List<ArticleResponse> listForEditors() {
+        return articleService.listAllForEditors();
     }
 
     @GetMapping("/me/deleted")
     @PreAuthorize("hasAnyRole('OWNER', 'CONTRIBUTOR')")
-    public List<ArticleResponse> listMyDeleted(@AuthenticationPrincipal UUID userId) {
-        return articleService.listMyDeleted(userId);
+    public List<ArticleResponse> listDeletedForEditors() {
+        return articleService.listAllDeletedForEditors();
     }
 
     @PostMapping("/{id}/restore")
